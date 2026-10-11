@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090914" />
+  <title>TrustLens AI — Enter the Detection Lab</title>
+  <meta name="description" content="TrustLens AI helps inspect screenshots and pasted messages for common warning signals. Student hackathon prototype." />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    :root{--bg:#0b1120;--panel:#111b2e;--panel2:#162238;--line:#26354d;--text:#f3f6fc;--muted:#aab6ca;--teal:#63ead4;--teal2:#2fc8b1;--orange:#ffb86b;--red:#ff6f78;--yellow:#ffe28a;--green:#80edb3;--shadow:0 18px 54px rgba(0,0,0,.24)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% -10%,rgba(47,200,177,.13),transparent 42%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}button,input,textarea{font:inherit}button{cursor:pointer}a{color:var(--teal)}
+    .wrap{max-width:1160px;margin:auto;padding:22px 20px 54px}.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:6px 0 30px}.brand{display:flex;align-items:center;gap:11px;font-weight:850;letter-spacing:-.4px;font-size:19px}.brand-mark{height:39px;width:39px;border-radius:13px;background:linear-gradient(135deg,var(--teal),#9bf2d7);color:#0b1723;display:grid;place-items:center;font-size:20px;box-shadow:0 8px 25px rgba(99,234,212,.16)}.nav-pill{border:1px solid #355062;background:rgba(99,234,212,.07);color:#b9fff2;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.4px}
+    .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.9fr);gap:25px;align-items:center;padding:23px 0 35px}.eyebrow{color:var(--teal);font-size:12px;text-transform:uppercase;letter-spacing:1.7px;font-weight:800}.hero h1{font-size:clamp(36px,5vw,58px);line-height:1.04;letter-spacing:-2px;margin:12px 0 16px;max-width:640px}.hero h1 span{color:var(--teal)}.hero p{max-width:590px;color:var(--muted);font-size:16px;margin:0}.hero-note{border:1px solid #274c50;background:linear-gradient(145deg,rgba(99,234,212,.10),rgba(17,27,46,.88));border-radius:23px;padding:23px;box-shadow:var(--shadow)}.note-icon{font-size:26px;margin-bottom:12px}.hero-note h3{font-size:16px;margin:0 0 8px}.hero-note p{font-size:13px}.mini-points{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}.mini-points span{font-size:11px;border-radius:999px;background:#1b2a3d;border:1px solid #2c4055;color:#d5e3ef;padding:6px 9px}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.78fr);gap:18px;align-items:start}.card{background:rgba(17,27,46,.92);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}.card-head{padding:20px 21px 0}.card-head h2{font-size:18px;margin:0 0 5px;letter-spacing:-.3px}.card-head p{font-size:13px;color:var(--muted);margin:0}.card-body{padding:18px 21px 21px}.drop{border:1.5px dashed #466276;border-radius:17px;min-height:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:22px;background:rgba(99,234,212,.025);transition:.2s}.drop.drag{border-color:var(--teal);background:rgba(99,234,212,.09)}.upload-icon{width:48px;height:48px;border-radius:16px;background:#1e3543;display:grid;place-items:center;font-size:24px;margin-bottom:10px}.drop strong{font-size:15px}.drop p{color:var(--muted);font-size:12px;margin:6px 0 14px}.actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:800;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .15s,filter .15s}.btn:hover{filter:brightness(1.07);transform:translateY(-1px)}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}.primary{background:var(--teal);color:#07151a}.secondary{background:#23334a;color:#eff6ff;border:1px solid #344963}.ghost{background:transparent;color:#c5d2e3;border:1px solid #38485e}.file-info{font-size:11px;color:#8393ab;margin-top:12px}.preview-wrap{margin-top:16px;display:none}.preview-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px;font-size:12px;color:#c9d4e4}.preview-frame{position:relative;display:flex;align-items:center;justify-content:center;background:#080d17;border:1px solid #273750;border-radius:14px;overflow:hidden;min-height:170px;max-height:440px}.preview-frame img{display:block;width:100%;max-height:440px;object-fit:contain}.preview-frame canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.progress-box{display:none;margin-top:14px}.progress-top{display:flex;justify-content:space-between;font-size:12px;color:#cbd6e5;margin-bottom:7px}.progress-track{height:7px;border-radius:99px;background:#27354a;overflow:hidden}.progress-fill{width:0;height:100%;background:var(--teal);transition:width .2s}
+    .side-stack{display:grid;gap:16px}.how-card{padding:20px}.how-card h3{margin:0 0 13px;font-size:15px}.how-step{display:grid;grid-template-columns:32px 1fr;gap:10px;margin:13px 0}.step-num{width:30px;height:30px;border-radius:10px;background:#203346;color:var(--teal);display:grid;place-items:center;font-size:12px;font-weight:850}.how-step b{display:block;font-size:13px;margin-bottom:2px}.how-step p{font-size:12px;color:var(--muted);margin:0}.privacy{padding:15px 16px;border-radius:16px;border:1px solid #314a49;background:rgba(99,234,212,.05);font-size:12px;color:#bddbd8}.privacy b{color:#e7fff9}.result{display:none;margin-top:19px}.result-top{display:flex;justify-content:space-between;align-items:center;gap:15px}.result-top h2{margin:0;font-size:19px}.result-status{font-size:11px;font-weight:900;border-radius:999px;padding:6px 9px;letter-spacing:.6px}.status-high{background:rgba(255,111,120,.15);color:#ff9fa5;border:1px solid rgba(255,111,120,.35)}.status-mid{background:rgba(255,226,138,.12);color:#ffe6a0;border:1px solid rgba(255,226,138,.35)}.status-low{background:rgba(128,237,179,.12);color:#9df4be;border:1px solid rgba(128,237,179,.32)}.scorebox{margin:17px 0 15px;padding:15px;border:1px solid #293a52;border-radius:16px;background:#0e1829;display:flex;align-items:center;gap:15px}.score-ring{width:65px;height:65px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;background:conic-gradient(var(--teal) var(--score,0%),#25354a 0);position:relative}.score-ring:before{content:"";position:absolute;inset:6px;border-radius:50%;background:#0e1829}.score-ring strong{position:relative;font-size:19px}.scorebox h3{font-size:13px;margin:0 0 3px}.scorebox p{font-size:11px;color:var(--muted);margin:0}.signals{display:grid;gap:9px}.signal{padding:13px 14px;border-radius:13px;background:#152238;border:1px solid #273951}.signal-head{display:flex;gap:10px;align-items:center;margin-bottom:4px}.signal-dot{height:8px;width:8px;flex:0 0 auto;border-radius:50%;background:var(--orange)}.signal h4{font-size:13px;margin:0}.signal p{font-size:12px;color:#b6c4d7;margin:0}.signal small{font-size:10px;color:#8fa1bb;display:block;margin-top:5px}.no-signals{border:1px solid #304653;background:#11252e;border-radius:13px;padding:14px;font-size:12px;color:#c7f0e9}.ocr-details{margin-top:16px;border-top:1px solid #27374f;padding-top:14px}.ocr-details summary{cursor:pointer;color:#b9c8dd;font-size:12px;font-weight:750}.ocr-details pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:12px;color:#ced8e7;background:#0b1422;border:1px solid #23334a;padding:12px;border-radius:12px;max-height:180px;overflow:auto}.manual{margin-top:15px}.manual summary{font-size:12px;color:#b9c8dd;cursor:pointer;font-weight:750}.manual textarea{margin-top:10px;width:100%;resize:vertical;min-height:100px;background:#0d1728;border:1px solid #34465e;border-radius:12px;color:var(--text);padding:12px;font-size:13px}.manual textarea:focus{outline:2px solid rgba(99,234,212,.4);border-color:var(--teal)}.warning{font-size:11px;line-height:1.5;color:#aebbd0;margin-top:13px}.footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#718198;font-size:11px;border-top:1px solid #202d41;margin-top:29px;padding-top:18px}.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#eafef9;color:#0a2222;font-size:13px;font-weight:750;padding:11px 15px;border-radius:12px;box-shadow:var(--shadow);transition:.2s;z-index:20}.toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:800px){.hero{grid-template-columns:1fr;padding-top:7px}.hero-note{max-width:580px}.layout{grid-template-columns:1fr}.side-stack{grid-template-columns:1fr 1fr}.privacy{align-self:stretch}.hero h1{letter-spacing:-1.4px}}@media(max-width:520px){.wrap{padding:14px 12px 35px}.nav{padding-bottom:22px}.nav-pill{font-size:10px}.hero{gap:18px}.hero h1{font-size:40px}.hero p{font-size:14px}.hero-note{padding:18px}.card-head{padding:18px 16px 0}.card-body{padding:16px}.side-stack{grid-template-columns:1fr}.drop{min-height:175px}.scorebox{align-items:flex-start}.result-top{align-items:flex-start}.actions .btn{flex:1}.footer{font-size:10px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+    .hidden{display:none!important}
+    /* Mystery Gate */
+    body{background:#090914;color:#f7f7ff}
+    .auth-screen{min-height:100vh;position:relative;overflow:hidden;padding:24px clamp(16px,4vw,56px) 40px;background:radial-gradient(ellipse at 18% 25%,rgba(105,63,230,.23),transparent 33%),radial-gradient(ellipse at 85% 70%,rgba(28,213,225,.12),transparent 35%),linear-gradient(135deg,#090914,#0b1022 56%,#090914)}
+    .auth-screen:before,.auth-screen:after{content:"";position:absolute;pointer-events:none;border-radius:50%;filter:blur(1px)}
+    .auth-screen:before{width:420px;height:420px;right:-125px;top:-190px;border:1px solid rgba(148,113,255,.25);box-shadow:0 0 75px rgba(98,69,226,.12),inset 0 0 70px rgba(98,69,226,.08)}
+    .auth-screen:after{width:260px;height:260px;left:-150px;bottom:-80px;border:1px solid rgba(71,227,232,.18);box-shadow:0 0 90px rgba(71,227,232,.08)}
+    .auth-top{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:1}
+    .auth-brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:-.5px;font-size:20px}.auth-brand-mark{height:42px;width:42px;border-radius:15px;display:grid;place-items:center;font-size:22px;color:#f8f8ff;background:linear-gradient(140deg,#8a5cff,#36dbe5);box-shadow:0 0 32px rgba(123,89,255,.36)}
+    .auth-top-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9f9abf;border:1px solid rgba(164,151,255,.21);background:rgba(22,20,46,.4);border-radius:999px;padding:9px 13px}
+    .auth-grid{max-width:1200px;min-height:calc(100vh - 116px);margin:0 auto;display:grid;grid-template-columns:minmax(0,1.03fr) minmax(340px,.8fr);gap:clamp(28px,6vw,88px);align-items:center;position:relative;z-index:1;padding:32px 0 40px}
+    .auth-copy{position:relative;padding:10px 0}.auth-kicker{display:flex;align-items:center;gap:9px;color:#b3a4ff;font-size:11px;letter-spacing:2.3px;font-weight:850;text-transform:uppercase}.auth-kicker:before{content:"";width:26px;height:1px;background:#9a7cff;box-shadow:0 0 12px #8a5cff}
+    .auth-copy h1{font-size:clamp(42px,6.2vw,78px);line-height:.99;letter-spacing:-3px;margin:20px 0 22px;max-width:700px}.auth-copy h1 span{color:#8c79ff;text-shadow:0 0 32px rgba(125,90,255,.23)}.auth-copy>p{font-size:15px;line-height:1.85;color:#aaa9c7;max-width:540px;margin:0}
+    .auth-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:26px}.auth-tags span{font-size:11px;padding:8px 11px;border-radius:999px;border:1px solid rgba(132,124,186,.22);background:rgba(24,23,49,.46);color:#d5d1f0}
+    .lens-art{position:relative;width:min(100%,350px);height:165px;margin-top:30px;display:flex;align-items:center;justify-content:center;opacity:.96}.lens-orbit{position:absolute;border:1px solid rgba(151,128,255,.28);border-radius:50%;width:260px;height:108px;transform:rotate(-23deg);box-shadow:0 0 25px rgba(109,81,238,.08)}.lens-orbit.two{width:225px;height:130px;transform:rotate(34deg);border-color:rgba(66,217,230,.23)}.lens-core{width:95px;height:95px;border-radius:50%;border:1px solid rgba(162,143,255,.68);background:radial-gradient(circle at 40% 35%,rgba(108,226,255,.22),rgba(83,55,171,.26) 45%,rgba(8,9,23,.9) 72%);box-shadow:0 0 25px rgba(132,95,255,.4),inset 0 0 22px rgba(69,220,237,.19);display:grid;place-items:center;position:relative}.lens-core:before{content:"";position:absolute;inset:10px;border:1px solid rgba(105,223,242,.42);border-radius:50%}.lens-pupil{height:24px;width:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d9f9ff,#6b84ff 42%,#583de3 75%);box-shadow:0 0 25px #7c67ff}
+    .auth-card{width:100%;max-width:470px;justify-self:end;border:1px solid rgba(158,148,223,.27);border-radius:27px;padding:clamp(22px,3vw,34px);background:linear-gradient(145deg,rgba(24,23,49,.92),rgba(12,16,34,.91));box-shadow:0 30px 100px rgba(0,0,0,.38),0 0 50px rgba(101,73,225,.09);backdrop-filter:blur(18px);position:relative}.auth-card:before{content:"";position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,#9a83ff,#42dae6,transparent)}
+    .auth-card-head{margin-bottom:23px}.auth-card-head .mini-label{font-size:10px;letter-spacing:2px;color:#7ddfe8;text-transform:uppercase;font-weight:800}.auth-card-head h2{font-size:25px;letter-spacing:-.7px;margin:8px 0 5px}.auth-card-head p{font-size:12px;color:#9f9dbb;margin:0;line-height:1.7}
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:rgba(8,10,25,.8);border:1px solid rgba(135,129,190,.16);border-radius:13px;margin-bottom:21px}.auth-tab{border:0;border-radius:9px;padding:10px;background:transparent;color:#9998b7;font-size:12px;font-weight:800}.auth-tab.active{color:#fff;background:linear-gradient(100deg,rgba(115,83,226,.66),rgba(45,145,183,.42));box-shadow:inset 0 0 0 1px rgba(173,161,255,.19)}
+    .auth-fields{display:grid;gap:14px}.auth-field{display:grid;gap:7px}.auth-field label{font-size:11px;color:#c4c1df;font-weight:750}.auth-field input{width:100%;background:rgba(7,10,23,.83);border:1px solid rgba(133,128,185,.27);border-radius:11px;padding:12px 13px;color:#fafaff;font-size:13px;outline:none}.auth-field input:focus{border-color:#9180ff;box-shadow:0 0 0 3px rgba(137,107,255,.12)}.auth-field input::placeholder{color:#666681}
+    .auth-submit{width:100%;margin-top:19px;border:0;border-radius:12px;padding:13px 14px;font-weight:900;color:#09091b;background:linear-gradient(100deg,#a891ff,#61e7ea);box-shadow:0 8px 26px rgba(105,111,244,.19);transition:.2s}.auth-submit:hover{filter:brightness(1.07);transform:translateY(-1px)}.guest-btn{width:100%;margin-top:10px;border:1px solid rgba(142,137,190,.28);border-radius:12px;padding:12px 14px;color:#e6e3ff;background:rgba(16,17,38,.7);font-weight:800}.guest-btn:hover{border-color:#8f7fff;background:rgba(82,63,151,.16)}.auth-notice{font-size:10px;line-height:1.65;color:#8585a5;margin:16px 0 0;padding-top:14px;border-top:1px solid rgba(130,127,179,.15)}.auth-status{min-height:17px;margin-top:8px;font-size:11px;color:#ffcbad}.auth-status.success{color:#8cebdc}.auth-foot{max-width:1200px;margin:0 auto;color:#666783;font-size:10px;position:relative;z-index:1;letter-spacing:.25px}
+    .app-screen{background:radial-gradient(ellipse at 80% -10%,rgba(125,88,255,.15),transparent 43%),radial-gradient(ellipse at 12% 20%,rgba(47,200,177,.075),transparent 32%),#0b1120;min-height:100vh}.app-screen .brand-mark{background:linear-gradient(135deg,#9275ff,#5ee4e9);color:#101127}.nav-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.nav-pill{border-color:#49406e;background:rgba(127,101,255,.09);color:#d2c9ff}
+    .auth-screen .brand-mark{display:none}.copy-report{padding:6px 10px;font-size:11px}.history-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #263248;font-size:12px}.history-item:last-child{border-bottom:0}.history-label{min-width:0}.history-label b{display:block;color:#e9edf9}.history-label small{display:block;color:#8b9bb1;margin-top:3px}.history-state{font-size:9px;font-weight:850;letter-spacing:.4px;padding:5px 7px;border:1px solid #3b4860;border-radius:99px;color:#cbd8ea;white-space:nowrap}.history-empty{font-size:12px;color:#91a1b9;line-height:1.65;padding:5px 0 2px}.history-actions{margin-top:8px}
+    @media(max-width:850px){.auth-grid{grid-template-columns:minmax(0,1fr) minmax(310px,.9fr);gap:25px}.auth-copy h1{font-size:clamp(40px,6.5vw,60px)}.lens-art{transform:scale(.88);transform-origin:left center;margin-bottom:-8px}}
+    @media(max-width:700px){.auth-screen{padding:17px 15px 24px}.auth-top-label{font-size:9px;letter-spacing:1px;padding:8px 10px}.auth-grid{grid-template-columns:1fr;gap:20px;min-height:auto;padding:37px 0 28px}.auth-copy h1{font-size:47px;letter-spacing:-2px;max-width:530px}.auth-copy>p{font-size:13px}.auth-tags{margin-top:17px}.lens-art{height:85px;margin-top:8px;transform:scale(.63);transform-origin:left center;margin-bottom:-28px}.auth-card{justify-self:center;max-width:500px}.auth-foot{line-height:1.6}.auth-top-label{max-width:155px;text-align:center}.nav-right{gap:6px}.nav-right .nav-pill{max-width:185px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+    @media(prefers-reduced-motion:no-preference){.lens-core{animation:lensPulse 3.8s ease-in-out infinite}.lens-orbit{animation:orbitDrift 15s linear infinite}.lens-orbit.two{animation-direction:reverse;animation-duration:19s}@keyframes lensPulse{0%,100%{box-shadow:0 0 25px rgba(132,95,255,.4),inset 0 0 22px rgba(69,220,237,.19)}50%{box-shadow:0 0 42px rgba(132,95,255,.58),inset 0 0 25px rgba(69,220,237,.24)}}@keyframes orbitDrift{from{transform:rotate(-23deg)}to{transform:rotate(337deg)}}}
+
+  </style>
+</head>
+<body>
+  <section id="authScreen" class="auth-screen" aria-label="TrustLens welcome gate">
+    <header class="auth-top">
+      <div class="auth-brand"><span class="auth-brand-mark" aria-hidden="true">◉</span><span>TrustLens <span style="color:#6de4eb">AI</span></span></div>
+      <div class="auth-top-label">Secure awareness prototype</div>
+    </header>
+    <main class="auth-grid">
+      <section class="auth-copy">
+        <div class="auth-kicker">The signal is hidden in plain sight</div>
+        <h1>Trust nothing.<br><span>Check everything.</span></h1>
+        <p>Step into the Detection Lab. Inspect suspicious screenshots and message text for common warning signs—then review the evidence before you act.</p>
+        <div class="auth-tags"><span>◈ Image text scan</span><span>◈ Warning-signal report</span><span>◈ Privacy-first prototype</span></div>
+        <div class="lens-art" aria-hidden="true"><div class="lens-orbit"></div><div class="lens-orbit two"></div><div class="lens-core"><div class="lens-pupil"></div></div></div>
+      </section>
+      <section class="auth-card" aria-labelledby="authTitle">
+        <div class="auth-card-head"><div class="mini-label">Access terminal / 01</div><h2 id="authTitle">Enter the unknown.</h2><p id="authSubtitle">Create a demo profile to enter the lab, or continue as a guest.</p></div>
+        <div class="auth-tabs" role="tablist" aria-label="Choose access type"><button id="showSignup" class="auth-tab active" type="button" role="tab" aria-selected="true">Create profile</button><button id="showLogin" class="auth-tab" type="button" role="tab" aria-selected="false">Log in</button></div>
+        <section id="signupPanel" class="auth-panel">
+          <form id="signupForm" novalidate>
+            <div class="auth-fields">
+              <div class="auth-field"><label for="signupName">Display name</label><input id="signupName" name="name" autocomplete="name" placeholder="What should we call you?" maxlength="50" required /></div>
+              <div class="auth-field"><label for="signupEmail">Email address</label><input id="signupEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="120" required /></div>
+              <div class="auth-field"><label for="signupPassword">Create demo password</label><input id="signupPassword" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required /></div>
+            </div>
+            <button class="auth-submit" type="submit">Create demo profile <span aria-hidden="true">↗</span></button>
+          </form>
+        </section>
+        <section id="loginPanel" class="auth-panel hidden">
+          <form id="loginForm" novalidate>
+            <div class="auth-fields">
+              <div class="auth-field"><label for="loginEmail">Email address</label><input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="120" required /></div>
+              <div class="auth-field"><label for="loginPassword">Demo password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="Enter 8 or more characters" required /></div>
+            </div>
+            <button class="auth-submit" type="submit">Enter the lab <span aria-hidden="true">↗</span></button>
+          </form>
+        </section>
+        <button id="guestBtn" class="guest-btn" type="button">Continue as guest <span aria-hidden="true">→</span></button>
+        <div id="authStatus" class="auth-status" role="status" aria-live="polite"></div>
+        <p class="auth-notice"><strong>Prototype note:</strong> Sign-up and login are demo-only front-end flows. No password is stored and credentials are not verified by a server. Do not enter a real password. Secure accounts require a backend.</p>
+      </section>
+    </main>
+    <footer class="auth-foot">TRUSTLENS AI · STUDENT HACKATHON PROTOTYPE · ANALYSIS IS GUIDANCE, NOT A SECURITY GUARANTEE</footer>
+  </section>
+
+  <div id="appScreen" class="wrap app-screen hidden">
+    <nav class="nav" aria-label="Main navigation">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">◉</span><span>TrustLens <span style="color:var(--teal)">AI</span></span></div>
+      <div class="nav-right"><div class="nav-pill" id="sessionBadge">GUEST SESSION</div><button id="backToGate" class="btn ghost" type="button" style="padding:8px 11px;font-size:11px">Exit lab</button></div>
+    </nav>
+
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Look closer. Question smarter.</div>
+        <h1>Before you trust it,<br><span>look through it.</span></h1>
+        <p>Check suspicious screenshots, offers and messages. TrustLens reads text in the image, highlights warning signs, and explains what you should double-check.</p>
+      </div>
+      <aside class="hero-note">
+        <div class="note-icon" aria-hidden="true">🔎</div>
+        <h3>Not just a label. A reason.</h3>
+        <p>Instead of declaring an image “real” or “fake”, TrustLens shows specific warning signals so you can make a safer decision.</p>
+        <div class="mini-points"><span>Visual highlights</span><span>Plain-language reasons</span><span>No certainty claims</span></div>
+      </aside>
+    </header>
+
+    <main class="layout">
+      <section class="card" aria-labelledby="uploadTitle">
+        <div class="card-head"><h2 id="uploadTitle">Inspect an image</h2><p>Choose a screenshot, poster or message that you want to double-check. Image reading uses English OCR with one optional contrast retry for speed.</p></div>
+        <div class="card-body">
+          <div id="dropZone" class="drop" role="button" tabindex="0" aria-label="Choose an image to inspect">
+            <div class="upload-icon" aria-hidden="true">↑</div>
+            <strong>Drop your image here</strong>
+            <p>or choose a file from your device</p>
+            <div class="actions"><button id="chooseBtn" class="btn primary" type="button">Choose image</button><button id="demoBtn" class="btn secondary" type="button">Try demo sample</button></div>
+            <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden />
+          </div>
+          <div class="file-info">PNG, JPG, WEBP or BMP · Best results with clear text · Max 8 MB</div>
+          <div id="previewWrap" class="preview-wrap">
+            <div class="preview-bar"><span id="fileName">Selected image</span><button id="clearBtn" class="btn ghost" type="button" style="padding:6px 9px;font-size:11px">Remove</button></div>
+            <div class="preview-frame"><img id="previewImage" alt="Selected image preview" /><canvas id="overlayCanvas" aria-hidden="true"></canvas></div>
+            <div class="actions" style="margin-top:13px"><button id="analyzeBtn" class="btn primary" type="button">✦ Analyze image</button><button id="resetMarksBtn" class="btn ghost" type="button">Clear highlights</button></div>
+            <div id="progressBox" class="progress-box" role="status" aria-live="polite"><div class="progress-top"><span id="progressText">Preparing image reader…</span><span id="progressPercent">0%</span></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
+          </div>
+          <details class="manual">
+            <summary>Can't read the image clearly? Paste its text instead</summary>
+            <textarea id="manualText" placeholder="Paste the wording from a suspicious message here…"></textarea>
+            <div class="actions" style="margin-top:8px"><button id="analyzeTextBtn" class="btn secondary" type="button">Check pasted text</button></div>
+          </details>
+          <div id="result" class="result" aria-live="polite">
+            <div class="result-top"><h2>What TrustLens noticed</h2><div class="actions"><span id="riskStatus" class="result-status status-mid">CAUTION</span><button id="copyReportBtn" class="btn ghost copy-report" type="button">Copy report</button></div></div>
+            <div class="scorebox"><div id="scoreRing" class="score-ring" style="--score:0%"><strong id="scoreValue">0</strong></div><div><h3 id="scoreTitle">Concern score</h3><p id="scoreDescription">A summary of warning signals found in the content — not a probability that it is a scam.</p></div></div>
+            <div id="signals" class="signals"></div>
+            <div class="warning">⚠️ TrustLens cannot prove that an image is genuine or fraudulent. OCR can make mistakes, and scammers may have no obvious warning signs. Verify independently using an official website or phone number you find yourself. Never share OTPs, passwords, PINs or sensitive banking details in response to a message.</div>
+            <details class="ocr-details"><summary>See text read from this image</summary><pre id="ocrText">No text read yet.</pre></details>
+          </div>
+        </div>
+      </section>
+
+      <aside class="side-stack">
+        <section class="card how-card">
+          <h3>How TrustLens works</h3>
+          <div class="how-step"><div class="step-num">01</div><div><b>Read the image</b><p>OCR extracts visible words from your screenshot.</p></div></div>
+          <div class="how-step"><div class="step-num">02</div><div><b>Look for warning signals</b><p>It checks for pressure tactics, money requests, prize claims, credential requests and suspicious links.</p></div></div>
+          <div class="how-step"><div class="step-num">03</div><div><b>Show the evidence</b><p>Matched words are highlighted, with simple explanations and safer next steps.</p></div></div>
+        </section>
+        <section class="privacy">
+          <b>🔐 Image privacy</b><br />Your image is processed in this browser page; TrustLens has no image-upload server. The page downloads its OCR engine and language data from a content-delivery network. Recent history stores result summaries only in this browser; it does not save images or scanned text. Avoid uploading private documents or sensitive personal information.
+        </section>
+        <section class="card how-card">
+          <h3>What it can — and can't — tell you</h3>
+          <div class="how-step"><div class="step-num">✓</div><div><b>Can flag patterns</b><p>Examples include urgent wording, requests for money, OTPs or passwords, and links asking you to act.</p></div></div>
+          <div class="how-step"><div class="step-num">!</div><div><b>Cannot verify authenticity</b><p>A warning signal is not proof. A clean result does not mean an offer or message is safe.</p></div></div>
+        </section>
+        <section class="card how-card" aria-labelledby="historyTitle">
+          <h3 id="historyTitle">Recent scans on this device</h3>
+          <div id="historyList" class="history-empty">Your recent result summaries will appear here. Images and pasted message text are not saved.</div>
+          <div class="actions history-actions"><button id="clearHistoryBtn" class="btn ghost" type="button" style="padding:7px 10px;font-size:11px">Clear history</button></div>
+        </section>
+      </aside>
+    </main>
+    <footer class="footer"><span>TrustLens AI · Image AI for safer decisions</span><span>Student hackathon prototype · Not a security guarantee</span></footer>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+      const fileInput = $('fileInput');
+      const dropZone = $('dropZone');
+      const previewWrap = $('previewWrap');
+      const previewImage = $('previewImage');
+      const overlayCanvas = $('overlayCanvas');
+      const ctx = overlayCanvas.getContext('2d');
+      const progressBox = $('progressBox');
+      const progressFill = $('progressFill');
+      const progressText = $('progressText');
+      const progressPercent = $('progressPercent');
+      const resultBox = $('result');
+      let selectedFile = null;
+      let currentObjectUrl = null;
+      let ocrInFlight = false;
+      let recognizedWords = [];
+      let toastTimer;
+
+      const rules = [
+        { id:'money', title:'Money or fee request', weight:24, patterns:[/\bpay(?:ment)?\b/i,/\bfee\b/i,/\btransfer\b/i,/\bdeposit\b/i,/\bupi\b/i,/\brefund\b/i,/\bprocessing charge\b/i,/\bverification fee\b/i,/₹|\bINR\b|\bRs\.?\s?\d/i,/भुगतान|रुपये|शुल्क|पैसे/i], reason:'The content appears to request money, a fee or a transfer. Do not pay an unexpected “release”, “verification” or “processing” fee without independently checking the organisation.' , keywords:['pay','payment','fee','transfer','deposit','upi','refund','processing','verification','₹','inr','rs','भुगतान','रुपये','शुल्क','पैसे'] },
+        { id:'credentials', title:'Sensitive details requested', weight:30, patterns:[/\botp\b/i,/\bpassword\b/i,/\bpasscode\b/i,/\b(?:upi\s*)?pin\b/i,/\bcvv\b/i,/\baccount details\b/i,/\bbank details\b/i,/\blogin now\b/i,/ओटीपी|पासवर्ड|पिन/i], reason:'The wording may ask for a code, password, PIN or banking information. Never share OTPs, passwords, UPI PINs or CVV in response to a message.' , keywords:['otp','password','passcode','pin','cvv','account','bank','login','ओटीपी','पासवर्ड','पिन'] },
+        { id:'prize', title:'Prize or unexpected reward claim', weight:20, patterns:[/\bwon\b/i,/\bwinner\b/i,/\bcongratulations\b/i,/\blottery\b/i,/\breward\b/i,/\bprize\b/i,/\bfree gift\b/i,/\bcash prize\b/i,/इनाम|जीत गए|बधाई|लॉटरी/i], reason:'Unexpected prize messages are a common lure, especially when they ask for payment or personal details. Check whether you actually entered and confirm through the official organisation.' , keywords:['won','winner','congratulations','lottery','reward','prize','gift','cash','इनाम','जीत','बधाई','लॉटरी'] },
+        { id:'urgency', title:'Urgency or pressure language', weight:18, patterns:[/\burgent\b/i,/\bimmediately\b/i,/\bexpires?\b/i,/\blimited time\b/i,/\bact now\b/i,/\blast chance\b/i,/\bwithin\s+\d+\s+minutes?\b/i,/\bsuspended\b/i,/\bfinal warning\b/i,/तुरंत|अभी|समय सीमा|जल्दी करें/i], reason:'Pressure to act quickly can stop people from checking details. Pause and verify through a separate, trusted channel rather than using the link or number in the message.' , keywords:['urgent','immediately','expires','limited','act','now','last','chance','within','minutes','suspended','warning','तुरंत','अभी','जल्दी'] },
+        { id:'link', title:'Link or click request', weight:14, patterns:[/https?:\/\//i,/\bwww\./i,/\bbit\.ly\b/i,/\btinyurl\b/i,/\bclick here\b/i,/\btap here\b/i,/\bopen the link\b/i,/लिंक पर|यहाँ क्लिक/i], reason:'A link in a message is not automatically malicious, but it should be checked carefully. Do not sign in or pay through an unexpected link; find the official website independently.' , keywords:['http','www','bit.ly','tinyurl','click','tap','link','लिंक','क्लिक'] },
+        { id:'threat', title:'Threat or account-pressure wording', weight:20, patterns:[/account.{0,25}(suspended|blocked|deactivated)/i,/\blegal action\b/i,/\barrest\b/i,/\bparcel held\b/i,/\bdelivery failed\b/i,/\bdisconnect(?:ed)?\b/i,/\bkyc.{0,20}(expire|update|pending)/i,/खाता बंद|ब्लॉक|कार्रवाई/i], reason:'Threats about blocked accounts, held parcels or legal trouble can pressure people into clicking or paying. Contact the company or agency using a verified contact method.' , keywords:['suspended','blocked','deactivated','legal','arrest','parcel','delivery','disconnect','kyc','expire','pending','खाता','ब्लॉक','कार्रवाई'] }
+      ];
+
+      function showToast(message) {
+        const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+      }
+      function loadFile(file) {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { showToast('Please choose an image file.'); return; }
+        if (file.size > 8 * 1024 * 1024) { showToast('Please choose an image under 8 MB.'); return; }
+        selectedFile = file; recognizedWords = [];
+        if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+        currentObjectUrl = URL.createObjectURL(file);
+        $('fileName').textContent = file.name || 'Demo sample image';
+        previewImage.onload = () => {
+          overlayCanvas.width = previewImage.naturalWidth;
+          overlayCanvas.height = previewImage.naturalHeight;
+          ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+          previewWrap.style.display = 'block'; resultBox.style.display = 'none'; progressBox.style.display = 'none';
+          $('ocrText').textContent = 'No text read yet.';
+          $('analyzeBtn').disabled = false;
+        };
+        previewImage.onerror = () => showToast('This image could not be opened. Try another file.');
+        previewImage.src = currentObjectUrl;
+      }
+      function clearAll() {
+        selectedFile = null; recognizedWords = []; fileInput.value = '';
+        if (currentObjectUrl) { URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = null; }
+        previewImage.removeAttribute('src');
+        previewWrap.style.display = 'none'; resultBox.style.display = 'none'; progressBox.style.display = 'none';
+        $('manualText').value = ''; ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+      }
+      function normalize(str) { return String(str || '').toLowerCase().replace(/[’']/g,"'").replace(/[^\p{L}\p{N}₹$.:/-]+/gu,' ').trim(); }
+      function runRules(text) {
+        const clean = String(text || '').replace(/\s+/g,' ').trim();
+        const matches = rules.filter(rule => rule.patterns.some(pattern => pattern.test(clean)));
+        let score = Math.min(95, matches.reduce((sum, r) => sum + r.weight, 0));
+        // A score is a sum of signal weights, not a calibrated scam probability.
+        const level = score >= 55 || matches.length >= 3 ? 'high' : score >= 25 || matches.length >= 2 ? 'mid' : 'low';
+        return { matches, score, level };
+      }
+      function setProgress(percent, message) {
+        progressBox.style.display = 'block'; progressFill.style.width = Math.max(0, Math.min(100, percent)) + '%';
+        progressPercent.textContent = Math.round(percent) + '%'; progressText.textContent = message;
+      }
+      function findFlaggedWords(words, matches) {
+        const keywords = new Set(matches.flatMap(r => r.keywords.map(normalize)));
+        return words.filter(word => {
+          const token = normalize(word.text);
+          if (!token) return false;
+          if (keywords.has(token)) return true;
+          for (const k of keywords) if (k.length > 3 && (token.includes(k) || k.includes(token))) return true;
+          return false;
+        });
+      }
+      function drawHighlights(words) {
+        ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);
+        if (!words || !words.length || !overlayCanvas.width) return;
+        ctx.lineWidth = Math.max(2, Math.round(overlayCanvas.width / 450));
+        words.forEach(w => {
+          const b = w.bbox; if (!b || !Number.isFinite(b.x0) || !Number.isFinite(b.y0)) return;
+          const width = b.x1 - b.x0, height = b.y1 - b.y0;
+          ctx.fillStyle = 'rgba(255, 111, 120, 0.21)'; ctx.strokeStyle = 'rgba(255, 111, 120, 0.95)';
+          ctx.fillRect(b.x0, b.y0, width, height); ctx.strokeRect(b.x0, b.y0, width, height);
+        });
+      }
+      function getOcrMetrics(text, words) {
+        const tokens = String(text || '').match(/[A-Za-z0-9\u0900-\u097F]+/g) || [];
+        const meaningful = String(text || '').match(/[A-Za-z]{4,}|[\u0900-\u097F]{3,}/g) || [];
+        const shortTokens = tokens.filter(token => token.length <= 2).length;
+        const confidences = (Array.isArray(words) ? words : [])
+          .filter(word => word && typeof word.confidence === 'number' && String(word.text || '').trim())
+          .map(word => Math.max(0, Math.min(100, word.confidence)));
+        const averageConfidence = confidences.length
+          ? confidences.reduce((sum, value) => sum + value, 0) / confidences.length
+          : null;
+        const shortRatio = tokens.length ? shortTokens / tokens.length : 1;
+        const meaningfulRatio = tokens.length ? meaningful.length / tokens.length : 0;
+        // Low confidence or a lot of tiny fragments can mean OCR picked up visual noise.
+        const lowConfidence = (averageConfidence !== null && averageConfidence < 45) ||
+          (tokens.length >= 8 && meaningfulRatio < 0.42 && shortRatio > 0.28);
+        // Used only to compare the normal pass with the enhanced-image retry; not a risk score.
+        const qualityRank = (averageConfidence === null ? 35 : averageConfidence) * 0.58 +
+          Math.min(meaningful.length, 15) * 1.8 + (1 - shortRatio) * 18;
+        return { tokens, meaningful, averageConfidence, shortRatio, meaningfulRatio, lowConfidence, qualityRank };
+      }
+      function makeEnhancedOcrCanvas(file) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          const url = URL.createObjectURL(file);
+          image.onload = () => {
+            URL.revokeObjectURL(url);
+            try {
+              const maxDimension = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
+              // Enlarge small screenshots more aggressively; cap output dimensions to limit memory use.
+              const scale = Math.min(3, 3200 / Math.max(1, maxDimension));
+              const canvas = document.createElement('canvas');
+              canvas.width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+              canvas.height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+              const canvasContext = canvas.getContext('2d', { willReadFrequently: true });
+              if (!canvasContext) throw new Error('Canvas is unavailable');
+              canvasContext.imageSmoothingEnabled = true;
+              canvasContext.imageSmoothingQuality = 'high';
+              canvasContext.fillStyle = '#ffffff';
+              canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+              canvasContext.drawImage(image, 0, 0, canvas.width, canvas.height);
+              const frame = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+              const pixels = frame.data;
+              for (let i = 0; i < pixels.length; i += 4) {
+                // Stronger grayscale contrast can make small printed letters easier to distinguish.
+                const gray = 0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2];
+                const enhanced = Math.max(0, Math.min(255, (gray - 128) * 1.42 + 128));
+                pixels[i] = pixels[i + 1] = pixels[i + 2] = enhanced;
+                pixels[i + 3] = 255;
+              }
+              canvasContext.putImageData(frame, 0, 0);
+              resolve(canvas);
+            } catch (error) { reject(error); }
+          };
+          image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image preprocessing failed')); };
+          image.src = url;
+        });
+      }
+      function renderResults(text, words, source) {
+        const cleanText = String(text || '').replace(/\s+/g, ' ').trim();
+        // Avoid a clean-looking zero score when OCR likely picked up visual noise or fragments.
+        const ocrMetrics = source === 'image' ? getOcrMetrics(cleanText, words) : null;
+        const meaningfulTokens = cleanText.match(/[A-Za-z]{4,}|[\u0900-\u097F]{3,}/g) || [];
+        const report = runRules(text);
+        // If a warning pattern was found, still show it; otherwise weak OCR must not look like an all-clear.
+        // If OCR is imperfect but it captured enough text and a recognizable warning
+        // pattern, show the possible signal instead of hiding it behind TEXT UNCLEAR.
+        // The UI also warns that OCR may be inaccurate; this is not a scam verdict.
+        const partialWarningEvidence = source === 'image' &&
+          cleanText.length >= 14 &&
+          (ocrMetrics ? ocrMetrics.tokens.length >= 4 : false) &&
+          report.matches.length > 0;
+        const readableEnough = source !== 'image' || partialWarningEvidence || (
+          meaningfulTokens.length >= 3 && cleanText.length >= 14 &&
+          !(ocrMetrics && ocrMetrics.lowConfidence)
+        );
+        const status = $('riskStatus');
+        status.className = 'result-status ' + (!readableEnough ? 'status-mid' : report.level === 'high' ? 'status-high' : report.level === 'mid' ? 'status-mid' : 'status-low');
+        status.textContent = !readableEnough ? 'TEXT UNCLEAR' : report.level === 'high' ? 'HIGH CONCERN' : report.level === 'mid' ? 'CAUTION' : 'FEW SIGNALS';
+        const reportStatus = status.textContent;
+        const reportLines = [
+          'TrustLens AI — result summary',
+          'Status: ' + reportStatus,
+          'Warning-signal score: ' + (readableEnough ? report.score + '/95 (not a scam probability)' : 'not assigned'),
+          'Source: ' + (source === 'image' ? 'image OCR' : 'pasted text'),
+          'Signals: ' + (report.matches.length ? report.matches.map(match => match.title).join(', ') : 'No obvious pattern detected'),
+          'Reminder: This prototype flags text patterns and cannot prove authenticity.'
+        ];
+        lastReportText = reportLines.join('\n');
+        saveHistory({ status: reportStatus, title: !readableEnough ? 'Text unclear' : report.matches.length ? (report.matches.length + ' signal category' + (report.matches.length === 1 ? '' : 'ies') + ' found') : 'No obvious signals found', time: new Date().toLocaleString(), score: readableEnough ? report.score : null, source: source });
+        $('scoreValue').textContent = readableEnough ? report.score : '—';
+        $('scoreRing').style.setProperty('--score', (readableEnough ? report.score : 0) + '%');
+        $('scoreTitle').textContent = !readableEnough ? 'Text could not be read reliably' : report.matches.length ? report.matches.length + ' signal categor' + (report.matches.length === 1 ? 'y' : 'ies') + ' found' : 'No obvious red flags found';
+        $('scoreDescription').textContent = !readableEnough ? 'No concern score assigned because the image text may be unreadable or incomplete.' : report.score ? 'A summary of detected warning signals — not a probability that this is a scam.' : 'No rule matched the text. This does not confirm the content is safe.';
+        const list = $('signals'); list.replaceChildren();
+        if (!readableEnough) {
+          const empty = document.createElement('div'); empty.className = 'no-signals';
+          empty.textContent = 'TrustLens could not read enough clear text to check this image reliably. Try a sharper screenshot with larger text, or paste the message text manually. This is not a safety verdict.'; list.appendChild(empty);
+        } else if (!report.matches.length) {
+          const empty = document.createElement('div'); empty.className = 'no-signals';
+          empty.textContent = 'No obvious warning pattern was detected in the text we could read. OCR may miss words, and real scams may have no obvious red flags. Verify independently before acting.'; list.appendChild(empty);
+        } else {
+          report.matches.forEach(match => {
+            const card = document.createElement('article'); card.className = 'signal';
+            const head = document.createElement('div'); head.className = 'signal-head';
+            const dot = document.createElement('span'); dot.className = 'signal-dot';
+            const title = document.createElement('h4'); title.textContent = match.title;
+            head.append(dot,title); card.appendChild(head);
+            const desc = document.createElement('p'); desc.textContent = match.reason; card.appendChild(desc);
+            const evidence = document.createElement('small');
+            evidence.textContent = source === 'image' && partialWarningEvidence
+              ? 'Possible pattern in imperfect OCR text · check the extracted wording below'
+              : 'Pattern detected · double-check this independently';
+            card.appendChild(evidence);
+            list.appendChild(card);
+          });
+        }
+        $('ocrText').textContent = text || 'No readable text was found. Try a clearer image or paste the text manually.';
+        if (source === 'image' && words) drawHighlights(findFlaggedWords(words, report.matches));
+        resultBox.style.display = 'block';
+        resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      async function recognizeQuick(imageSource, logger) {
+        // One layout pass per image. PSM 11 is intended for sparse/scattered poster text.
+        // A single optional enhanced retry is allowed by analyzeImage() if OCR is weak.
+        const result = await Tesseract.recognize(imageSource, 'eng', {
+          logger,
+          tessedit_pageseg_mode: 11
+        });
+        return result && result.data ? result.data : { text: '', words: [] };
+      }
+
+      async function analyzeImage() {
+        if (ocrInFlight) { showToast('A previous image read is still finishing. Paste text now or try again after it ends.'); return; }
+        if (!selectedFile) { showToast('Choose an image first.'); return; }
+        if (!window.Tesseract) {
+          showToast('OCR library did not load. Check your internet, refresh, or paste text instead.');
+          setProgress(100, 'OCR library unavailable. Use pasted text as a fallback.');
+          return;
+        }
+        ocrInFlight = true;
+        $('analyzeBtn').disabled = true;
+        setProgress(2, 'Starting the text reader…');
+        resultBox.style.display = 'none';
+        let timedOut = false;
+        const timeoutId = window.setTimeout(() => {
+          timedOut = true;
+          $('analyzeBtn').disabled = false;
+          setProgress(100, 'OCR took too long. Paste the text instead or use the demo sample.');
+          showToast('Reading took too long. Use “Paste its text instead”.');
+        }, 45000);
+        try {
+          setProgress(8, 'Reading image text (first use may download OCR data)…');
+          let bestData = await recognizeQuick(selectedFile, m => {
+            if (timedOut) return;
+            const progress = typeof m.progress === 'number' ? m.progress * 42 + 8 : 8;
+            const stage = m.status === 'recognizing text' ? 'Reading text…' : m.status === 'loading language traineddata' ? 'Loading English reader…' : 'Preparing OCR…';
+            setProgress(progress, stage);
+          });
+          if (timedOut) return;
+          if (!bestData || typeof bestData !== 'object') bestData = { text: '', words: [] };
+          const firstMetrics = getOcrMetrics(bestData.text || '', bestData.words || []);
+          const firstMeaningful = String(bestData.text || '').match(/[A-Za-z]{4,}|[\u0900-\u097F]{3,}/g) || [];
+          const shouldRetry = firstMetrics.lowConfidence || firstMeaningful.length < 4 || String(bestData.text || '').trim().length < 24;
+
+          if (shouldRetry && !timedOut) {
+            setProgress(55, 'Text is unclear. One quick contrast retry…');
+            try {
+              const enhancedCanvas = await makeEnhancedOcrCanvas(selectedFile);
+              if (timedOut) return;
+              const secondData = await recognizeQuick(enhancedCanvas, m => {
+                if (timedOut) return;
+                const progress = typeof m.progress === 'number' ? m.progress * 38 + 55 : 55;
+                setProgress(progress, m.status === 'recognizing text' ? 'Reading enhanced image…' : 'Preparing enhanced image…');
+              });
+              if (timedOut) return;
+              if (secondData && typeof secondData === 'object') {
+                const secondMetrics = getOcrMetrics(secondData.text || '', secondData.words || []);
+                if (secondMetrics.qualityRank > firstMetrics.qualityRank) bestData = secondData;
+              }
+            } catch (retryError) {
+              console.warn('TrustLens enhanced OCR retry skipped:', retryError);
+            }
+          }
+          if (timedOut) return;
+          recognizedWords = Array.isArray(bestData.words) ? bestData.words : [];
+          setProgress(100, 'Analysis complete');
+          renderResults(bestData.text || '', recognizedWords, 'image');
+        } catch (err) {
+          console.error('TrustLens OCR error:', err);
+          if (!timedOut) {
+            showToast('Could not read this image. Check your internet or paste its text below.');
+            setProgress(100, 'Could not read image. Try the pasted-text option.');
+          }
+        } finally {
+          window.clearTimeout(timeoutId);
+          ocrInFlight = false;
+          $('analyzeBtn').disabled = false;
+        }
+      }
+
+      let activeSession = { mode: 'guest', name: 'Guest', email: '' };
+      let lastReportText = 'No report available yet. Analyze an image or paste text first.';
+
+      function setAuthMode(mode) {
+        const signup = mode === 'signup';
+        $('signupPanel').classList.toggle('hidden', !signup);
+        $('loginPanel').classList.toggle('hidden', signup);
+        $('showSignup').classList.toggle('active', signup);
+        $('showLogin').classList.toggle('active', !signup);
+        $('showSignup').setAttribute('aria-selected', String(signup));
+        $('showLogin').setAttribute('aria-selected', String(!signup));
+        $('authTitle').textContent = signup ? 'Enter the unknown.' : 'Welcome back, explorer.';
+        $('authSubtitle').textContent = signup ? 'Create a demo profile to enter the lab, or continue as a guest.' : 'Enter any valid email and demo password to preview the login flow.';
+        $('authStatus').textContent = '';
+        $('authStatus').classList.remove('success');
+      }
+      function enterLab(mode, name, email) {
+        activeSession = { mode, name: name || (mode === 'guest' ? 'Guest' : 'Member'), email: email || '' };
+        $('sessionBadge').textContent = (mode === 'guest' ? 'GUEST' : 'DEMO MEMBER') + ' · ' + activeSession.name;
+        $('authScreen').classList.add('hidden');
+        $('appScreen').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        if (mode === 'guest') showToast('Guest access ready. No account needed.');
+        else showToast('Demo session started. Secure account login is not connected yet.');
+        renderHistory();
+      }
+      function exitLab() {
+        activeSession = { mode: 'guest', name: 'Guest', email: '' };
+        clearAll();
+        $('appScreen').classList.add('hidden');
+        $('authScreen').classList.remove('hidden');
+        $('authStatus').textContent = '';
+        $('signupPassword').value = '';
+        $('loginPassword').value = '';
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      }
+      function validEmail(value) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim()); }
+      $('showSignup').addEventListener('click', () => setAuthMode('signup'));
+      $('showLogin').addEventListener('click', () => setAuthMode('login'));
+      $('guestBtn').addEventListener('click', () => enterLab('guest', 'Guest', ''));
+      $('backToGate').addEventListener('click', exitLab);
+      $('signupForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const name = $('signupName').value.trim();
+        const email = $('signupEmail').value.trim();
+        const password = $('signupPassword').value;
+        if (name.length < 2) { $('authStatus').textContent = 'Please enter a display name with at least 2 characters.'; return; }
+        if (!validEmail(email)) { $('authStatus').textContent = 'Please enter a valid email address.'; return; }
+        if (password.length < 8) { $('authStatus').textContent = 'The demo password must have at least 8 characters.'; return; }
+        $('authStatus').textContent = 'Demo profile accepted. No password will be stored.';
+        $('authStatus').classList.add('success');
+        enterLab('member-demo', name, email);
+      });
+      $('loginForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const email = $('loginEmail').value.trim();
+        const password = $('loginPassword').value;
+        if (!validEmail(email)) { $('authStatus').textContent = 'Please enter a valid email address.'; return; }
+        if (password.length < 8) { $('authStatus').textContent = 'Enter a demo password with at least 8 characters.'; return; }
+        const localName = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()).slice(0, 50) || 'Member';
+        enterLab('member-demo', localName, email);
+      });
+
+      function readHistory() {
+        try {
+          const saved = JSON.parse(localStorage.getItem('trustlens_recent_scans_v1') || '[]');
+          return Array.isArray(saved) ? saved.slice(0, 5) : [];
+        } catch (_) { return []; }
+      }
+      function renderHistory() {
+        const host = $('historyList');
+        if (!host) return;
+        const items = readHistory();
+        host.replaceChildren();
+        if (!items.length) {
+          host.className = 'history-empty';
+          host.textContent = 'Your recent result summaries will appear here. Images and pasted message text are not saved.';
+          return;
+        }
+        host.className = '';
+        items.forEach(item => {
+          const row = document.createElement('div'); row.className = 'history-item';
+          const label = document.createElement('div'); label.className = 'history-label';
+          const title = document.createElement('b'); title.textContent = item.title || 'Scan complete';
+          const time = document.createElement('small'); time.textContent = item.time || 'Recent';
+          label.append(title, time);
+          const state = document.createElement('span'); state.className = 'history-state'; state.textContent = item.status || 'CHECKED';
+          row.append(label, state); host.appendChild(row);
+        });
+      }
+      function saveHistory(item) {
+        try {
+          const items = readHistory();
+          items.unshift(item);
+          localStorage.setItem('trustlens_recent_scans_v1', JSON.stringify(items.slice(0, 5)));
+        } catch (_) { /* Local storage may be disabled; analysis still works. */ }
+        renderHistory();
+      }
+      $('clearHistoryBtn').addEventListener('click', () => {
+        try { localStorage.removeItem('trustlens_recent_scans_v1'); } catch (_) {}
+        renderHistory(); showToast('Recent scan history cleared.');
+      });
+      $('copyReportBtn').addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) await navigator.clipboard.writeText(lastReportText);
+          else {
+            const temp = document.createElement('textarea'); temp.value = lastReportText; temp.style.position = 'fixed'; temp.style.opacity = '0'; document.body.appendChild(temp); temp.select();
+            const copied = document.execCommand('copy'); temp.remove(); if (!copied) throw new Error('Copy command unavailable');
+          }
+          showToast('Report summary copied.');
+        } catch (_) { showToast('Copy is unavailable in this browser. You can read the result on screen.'); }
+      });
+
+      setAuthMode('signup');
+      renderHistory();
+
+      $('chooseBtn').addEventListener('click', () => fileInput.click());
+      dropZone.addEventListener('click', e => { if (!e.target.closest('button')) fileInput.click(); });
+      dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+      fileInput.addEventListener('change', e => loadFile(e.target.files && e.target.files[0]));
+      ['dragenter','dragover'].forEach(type => dropZone.addEventListener(type, e => { e.preventDefault(); dropZone.classList.add('drag'); }));
+      ['dragleave','drop'].forEach(type => dropZone.addEventListener(type, e => { e.preventDefault(); dropZone.classList.remove('drag'); }));
+      dropZone.addEventListener('drop', e => loadFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]));
+      $('clearBtn').addEventListener('click', clearAll);
+      $('resetMarksBtn').addEventListener('click', () => { ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height); showToast('Highlights cleared.'); });
+      $('analyzeBtn').addEventListener('click', analyzeImage);
+      $('analyzeTextBtn').addEventListener('click', () => {
+        const text = $('manualText').value.trim();
+        if (!text) { showToast('Paste the message text first.'); return; }
+        renderResults(text, [], 'text');
+      });
+      $('demoBtn').addEventListener('click', () => {
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620"><rect width="1000" height="620" rx="22" fill="#f6f7fb"/><rect x="35" y="35" width="930" height="550" rx="18" fill="white" stroke="#d9deea" stroke-width="3"/><rect x="35" y="35" width="930" height="94" rx="18" fill="#172943"/><rect x="35" y="105" width="930" height="24" fill="#172943"/><text x="78" y="93" font-family="Arial,sans-serif" font-size="32" font-weight="700" fill="#ffffff">REWARD NOTICE</text><text x="78" y="190" font-family="Arial,sans-serif" font-size="35" font-weight="700" fill="#172943">CONGRATULATIONS!</text><text x="78" y="245" font-family="Arial,sans-serif" font-size="29" fill="#1c293b">You have WON ₹50,000</text><rect x="68" y="275" width="865" height="66" rx="10" fill="#fff0ef" stroke="#ffb6b8" stroke-width="2"/><text x="90" y="317" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#b42332">Pay ₹499 verification fee</text><text x="78" y="390" font-family="Arial,sans-serif" font-size="25" fill="#303f55">Offer expires in 5 minutes!</text><rect x="78" y="434" width="310" height="74" rx="13" fill="#d84b58"/><text x="233" y="480" font-family="Arial,sans-serif" font-size="26" font-weight="700" text-anchor="middle" fill="#ffffff">CLAIM NOW</text><text x="78" y="548" font-family="Arial,sans-serif" font-size="17" fill="#738096">Sample for product demonstration only · Not a real offer</text></svg>`;
+        const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight; c.getContext('2d').drawImage(img,0,0); c.toBlob(blob => { if (blob) { const file = new File([blob], 'trustlens-demo-sample.png', {type:'image/png'}); loadFile(file); $('manualText').value = ''; showToast('Demo sample loaded. Tap Analyze image.'); } }, 'image/png'); };
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      });
+    })();
+  </script>
+</body>
+</html>
